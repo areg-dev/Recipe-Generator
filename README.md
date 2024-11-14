@@ -28,7 +28,7 @@ Recipe Generator is a microservice-based application that generates, validates, 
    ```bash
     # Ubuntu 22.04
    
-    brew install --cask docker
+    sudo snap install docker
     ```
    
 ## Build and Run Docker Images
