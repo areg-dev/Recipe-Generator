@@ -1,0 +1,4 @@
+import os
+
+RABBITMQ_URL = os.getenv("RABBITMQ_URL")
+OPENAI_API_SECRET = os.getenv("OPENAI_API_SECRET")

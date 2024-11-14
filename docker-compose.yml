@@ -1,0 +1,45 @@
+services:
+
+  api-gateway:
+    container_name: api_gateway
+    build: ./services/api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - recipe-generation
+
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    networks:
+      - recipe-network
+
+  recipe-generation:
+    container_name: recipe_generation
+    build:
+      context: ./services/recipe-generation
+    depends_on:
+      - rabbitmq
+    ports:
+      - "5001:5001"
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - OPENAI_API_SECRET=X
+    networks:
+      - recipe-network
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - recipe-network
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest    # Set the custom username
+      - RABBITMQ_DEFAULT_PASS=guest    # Set the custom password
+
+
+networks:
+  recipe-network:
+    driver: bridge
