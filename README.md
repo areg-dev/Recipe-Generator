@@ -54,16 +54,6 @@ To run the tests for the `api-gateway` service:
     pytest -s test_api_gateway.py
     ```
 
-## Docker Compose Configuration
-
-The `docker-compose.yml` file defines the setup for all the microservices, including:
-
-- **api-gateway**: Exposes the business logic API.
-- **recipe-generation**: Runs the OpenAI API-based recipe generation service.
-- **nutritional-calculation**: Calculates nutrition data.
-- **recipe-validation**: Validates the generated recipes using OpenAI API.
-- **RabbitMQ**: Manages the communication between services.
-
 ## Recipe Generation Example
 
 #### Input Example
@@ -80,6 +70,6 @@ The `docker-compose.yml` file defines the setup for all the microservices, inclu
 ```
 
 #### Output Example
-```http
+```text
 Sure! Here's a quick and delicious vegetarian pasta recipe that's nut-free and inspired by Italian cuisine. This recipe serves 4 and can be prepared in under 30 minutes.
 ```
