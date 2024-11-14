@@ -16,10 +16,18 @@ Recipe Generator is a microservice-based application that generates, validates, 
 - **Python** version ~3.10
 - **Docker** version ~27.0.3
 - **pytest** version ~7.4.2
+- **requests** version ~2.32.3
 
 
-1. Install Docker (at this moment tested on Apple Silicone):
+1. Install Docker (at this moment tested on Apple Silicone and Ubuntu):
     ```bash
+    # MacOS
+   
+    brew install --cask docker
+    ```
+   ```bash
+    # Ubuntu 22.04
+   
     brew install --cask docker
     ```
    
