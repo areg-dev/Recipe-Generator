@@ -16,7 +16,9 @@ class RabbitMQ:
     def connect_to_rabbitmq():
         while True:
             try:
-                return pika.BlockingConnection(pika.URLParameters(RABBITMQ_URL))
+                parameters = pika.URLParameters(RABBITMQ_URL)
+                parameters.heartbeat = 10
+                return pika.BlockingConnection(parameters)
             except Exception:
                 time.sleep(3)
 
@@ -35,18 +37,15 @@ class RabbitMQ:
         self.connect()
 
     def connect(self):
-        if RabbitMQ.RABBITMQ_CONNECTION is None or not RabbitMQ.RABBITMQ_CONNECTION.is_open:
+        if RabbitMQ.RABBITMQ_CONNECTION is None or RabbitMQ.RABBITMQ_CONNECTION.is_closed:
             RabbitMQ.initialize_rabbitmq()
-
-        self.channel = RabbitMQ.RABBITMQ_CONNECTION.channel()
-        self.channel.queue_declare(queue=self.response_queue)
-
-    def disconnect(self):
-        if self.channel and self.channel.is_open:
-            self.channel.close()
-
-    def __del__(self):
-        self.disconnect()
+        try:
+            self.channel = RabbitMQ.RABBITMQ_CONNECTION.channel()
+            self.channel.queue_declare(queue=self.response_queue)
+        except Exception:
+            RabbitMQ.initialize_rabbitmq()  # Try reconnect
+            self.channel = RabbitMQ.RABBITMQ_CONNECTION.channel()
+            self.channel.queue_declare(queue=self.response_queue)
 
     def publish(self, corr_id, data):
         if not self.channel.is_open:
@@ -54,7 +53,6 @@ class RabbitMQ:
         if not self.channel.is_open:
             Logger.error("Channel disconnected: " + self.request_queue)
             return
-
         self.channel.basic_publish(
             exchange='',
             routing_key=self.request_queue,
@@ -71,7 +69,6 @@ class RabbitMQ:
         if not self.channel.is_open:
             Logger.error("Channel disconnected: " + self.request_queue)
             return
-
         self.channel.basic_consume(
             queue=self.response_queue,
             on_message_callback=callback,

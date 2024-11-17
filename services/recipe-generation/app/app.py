@@ -17,7 +17,9 @@ OPENAI_CLIENT = OpenAI(api_key=OPENAI_API_SECRET)
 def connect_to_rabbitmq():
     while True:
         try:
-            return pika.BlockingConnection(pika.URLParameters(RABBITMQ_URL))
+            parameters = pika.URLParameters(RABBITMQ_URL)
+            parameters.heartbeat = 10
+            return pika.BlockingConnection(parameters)
         except Exception:
             time.sleep(3)
 
