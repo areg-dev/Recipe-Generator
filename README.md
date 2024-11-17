@@ -34,11 +34,13 @@ Recipe Generator is a microservice-based application that generates, validates, 
    
 ## Build and Run Docker Images
 
-2. Clone the repository and navigate to the root directory:
+1. Clone the repository and navigate to the root directory:
     ```bash
     git clone git@github.com:areg-dev/Recipe-Generator.git
     cd Recipe-Generator
     ```
+
+2. In the `docker-compose.yml` file, replace all instances of `- OPENAI_API_SECRET=X` with your OpenAI API key.
 
 3. Build the Docker images:
     ```bash
