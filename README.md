@@ -34,9 +34,10 @@ Recipe Generator is a microservice-based application that generates, validates, 
    
 ## Build and Run Docker Images
 
-2. Navigate to the root of the `recipe-generator` directory:
+2. Clone the repository and navigate to the root directory:
     ```bash
-    cd recipe-generator
+    git clone git@github.com:areg-dev/Recipe-Generator.git
+    cd Recipe-Generator
     ```
 
 3. Build the Docker images:
