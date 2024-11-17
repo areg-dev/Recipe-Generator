@@ -6,9 +6,10 @@ Recipe Generator is a microservice-based application that generates, validates, 
 
 - **api-gateway**: Business logic API built with FastAPI.
 - **recipe-generation**: Generates recipes using OpenAI API.
-- **nutritional-calculation**: Calculates nutritional information for recipes.
+- **nutritional-calculator**: Calculates nutritional information for recipes.
 - **recipe-validation**: Validates recipes using OpenAI API.
 - **RabbitMQ**: Messaging system used for service communication.
+- **MongoDB**: Storing successfully created recipes.
 
 
 ## Requirements
@@ -40,13 +41,167 @@ Recipe Generator is a microservice-based application that generates, validates, 
 
 3. Build the Docker images:
     ```bash
-    docker-compose build
+    docker compose build
     ```
 
 4. Start the services:
     ```bash
-    docker-compose up
+    docker compose up
     ```
+
+# Recipe API Documentation
+
+This API provides functionality for generating, validating, and retrieving recipes. It also supports nutritional calculations and pagination of stored recipes.
+
+## Table of Contents
+
+- [Base URL](#base-url)
+- [Endpoints](#endpoints)
+  - [POST /make-recipe](#post-making-recipe)
+  - [GET /recipes](#get-retrieving-recipes)
+  - [POST /generate-recipe](#post-generating-recipe)
+  - [POST /calculate-nutrition](#post-calculating-nutrition)
+  - [POST /validate-recipe](#post-validating-recipe)
+
+
+## Base URL
+
+The base URL for the API is: http://127.0.0.1:8080/
+
+
+## Endpoints
+
+### POST /generate-recipe
+
+Generates a recipe based on the provided criteria.
+
+#### Request Body
+
+```json
+{
+  "number_of_persons": 4,
+  "dish_type": "main",
+  "max_cooking_time": 30,
+  "allergies_list": ["nuts"],
+  "diet_requirements": ["vegetarian"],
+  "cuisine_list": ["Italian"]
+}
+```
+
+#### Response
+
+```json
+{
+  "recipe": "<<Recipe generated from OpenAI API>>"
+}
+```
+
+### POST /calculate-nutrition
+
+Calculates the nutrition information of a recipe.
+
+
+#### Request Body
+
+```json
+{
+  "recipe": "<<Recipe content>>"
+}
+```
+
+#### Response
+
+```json
+{
+  "message": "<<Calculated nutrition from OpenAI API>>"
+}
+```
+
+### POST /validate-recipe
+
+Validates a recipe to return Yes or No.
+
+
+#### Request Body
+
+```json
+{
+  "recipe": "<<Recipe with nutrition content>>"
+}
+```
+
+#### Response
+
+```json
+{
+  "message": "<<Yes/No>>"
+}
+```
+
+### POST /make-recipe
+
+Generates, calculates nutrition, and validates a recipe.
+This is a combination of the /generate-recipe, /calculate-nutrition, 
+and /validate-recipe endpoints. If validation is true then the content adding to the 
+MongoDB
+
+
+#### Request Body
+
+```json
+{
+  "number_of_persons": 4,
+  "dish_type": "main",
+  "max_cooking_time": 30,
+  "allergies_list": ["nuts"],
+  "diet_requirements": ["vegetarian"],
+  "cuisine_list": ["Italian"]
+}
+```
+
+#### Response
+
+```json
+{
+  "recipe": "Creamy Spinach and Tomato ........",
+  "nutrition": {
+    "calories": 760,
+    "protein": 20,
+    "fat": 40,
+    "carbohydrates": 78,
+    "totalWeight": 680
+  },
+  "validation": "Valid"
+}
+```
+
+### GET /recipes
+
+Return a paginated list of stored recipes.
+
+
+#### Query Parameters
+
+- **page (optional):** The page number (default is 1).
+- **page_size (optional):** The number of recipes per page (default is 10, max is 100).
+ 
+ 
+#### Response
+
+```json
+{
+  "current_page": 1,
+  "total_pages": 10,
+  "page_size": 10,
+  "total_records": 100,
+  "data": [
+    "Recipe 1",
+    "Recipe 2",
+    "Recipe 3"
+  ]
+}
+```
+
 
 ## Run Tests
 
@@ -59,7 +214,7 @@ To run the tests for the `api-gateway` service:
 
 2. Run the tests using pytest:
     ```bash
-    pytest -s test_api_gateway.py
+    pytest -s test_functional.py
     ```
 
 ## Recipe Generation Example
@@ -78,47 +233,49 @@ To run the tests for the `api-gateway` service:
 ```
 
 #### Output Examples
-```text
-Sure! Here's a quick and delicious vegetarian pasta recipe that's nut-free and inspired by Italian cuisine. This recipe serves 4 and can be prepared in under 30 minutes.
-```
 
 ```text
-Sure! Here's a quick and delicious vegetarian pasta recipe that's nut-free and perfect for serving 4 people, all within 30 minutes.
+Sure! Here’s a quick and delicious Italian vegetarian pasta recipe that’s nut-free and serves four people. You can have this ready in under 30 minutes.
 
-### Quick Italian Spinach and Tomato Pasta
+### **Italian Vegetable Pasta**
 
-#### Ingredients:
-- 12 oz (340g) pasta (penne or spaghetti)
-- 2 tablespoons olive oil
-- 4 cloves garlic, minced
-- 1 can (14 oz) diced tomatoes (with their juice)
-- 4 cups fresh spinach (if using frozen, thawed and drained)
+#### **Ingredients:**
+- 12 ounces (340g) of spaghetti or your favorite pasta
+- 2 tablespoons of olive oil
+- 3 cloves garlic, minced
+- 1 medium zucchini, diced
+- 1 red bell pepper, diced
+- 1 cup cherry tomatoes, halved
+- 1 cup spinach (fresh or frozen)
 - 1 teaspoon dried oregano
-- 1 teaspoon dried basil
-- Salt and pepper, to taste
-- Grated Parmesan cheese (optional, for serving)
-- Fresh basil leaves, for garnish (optional)
+- 1/2 teaspoon red pepper flakes (optional)
+- Salt and pepper to taste
+- 1/4 cup grated Parmesan cheese (optional for serving)
+- Fresh basil leaves, for garnish
 
-#### Instructions:
+#### **Instructions:**
+1. **Cook the Pasta:**
+  - Bring a large pot of salted water to a boil. Add the spaghetti and cook according to package instructions until al dente (usually about 8-10 minutes). Reserve 1 cup of pasta water, then drain the pasta.
+  
+2. **Sauté the Vegetables:**
+  - In a large skillet, heat the olive oil over medium heat. Add the minced garlic and sauté for about 1 minute until fragrant.
+  - Add the diced zucchini and red bell pepper. Cook for about 5 minutes, stirring occasionally, until they begin to soften.
 
-1. Cook the Pasta:
-   - Bring a large pot of salted water to a boil. Add the pasta and cook according to the package directions until al dente. Reserve ½ cup of pasta water, then drain the pasta.
+3. **Add Remaining Ingredients:**
+  - Stir in the cherry tomatoes, spinach, oregano, and red pepper flakes (if using). Cook for another 3-4 minutes until the tomatoes are warmed through and the spinach is wilted. Season with salt and pepper to taste.
+  
+4. **Combine Pasta and Sauce:**
+  - Add the drained spaghetti to the skillet. Toss everything together gently. If the mixture seems dry, add a splash of the reserved pasta water until it reaches your desired consistency.
 
-2. Prepare the Sauce:
-   - While the pasta is cooking, heat the olive oil in a large skillet over medium heat. Add the minced garlic and sauté for about 1 minute until fragrant, stirring frequently to avoid burning.
+5. **Serve:**
+  - Divide the pasta among four plates. Sprinkle with grated Parmesan cheese (if using) and garnish with fresh basil leaves. Serve immediately.
+  
+### **Enjoy your quick and delicious Italian Vegetable Pasta!** 
 
-3. Add Tomatoes and Spinach:
-   - Pour in the canned diced tomatoes (with juice) and stir. Bring to a simmer and add the fresh spinach. Cook for about 3-4 minutes until the spinach wilts down.
+Feel free to customize the recipe with other vegetables you may have on hand, such as mushrooms or asparagus, to suit your taste!
 
-4. Season:
-   - Stir in the dried oregano and basil. Season with salt and pepper to taste. If the sauce is too thick, add a little of the reserved pasta water to reach your desired consistency.
+calories: 480, protein: 12, fat: 16, carbohydrates: 72, totalWeight: 860
 
-5. Combine:
-   - Add the drained pasta to the skillet and toss everything together to combine. Cook for another 1-2 minutes to heat through, allowing the pasta to absorb some of the sauce.
-
-6. Serve:
-   - Plate the pasta and sprinkle with grated Parmesan cheese and fresh basil leaves, if desired.
-
-#### Enjoy!
-This dish is healthy, flavorful, and comes together in under 30 minutes. Perfect for a quick weeknight dinner!```
 ```
+
+

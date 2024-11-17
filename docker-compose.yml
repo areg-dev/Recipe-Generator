@@ -6,10 +6,13 @@ services:
     ports:
       - "8080:8080"
     depends_on:
+      - mongo
       - recipe-generation
-
+      - nutritional-calculator
+      - recipe-validation
     environment:
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - MONGO_URI=mongodb://root:root@mongo:27017
     networks:
       - recipe-network
 
@@ -21,6 +24,34 @@ services:
       - rabbitmq
     ports:
       - "5001:5001"
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - OPENAI_API_SECRET=X
+    networks:
+      - recipe-network
+
+  nutritional-calculator:
+    container_name: nutritional_calculator
+    build:
+      context: ./services/nutritional-calculator
+    depends_on:
+      - rabbitmq
+    ports:
+      - "5002:5002"
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - OPENAI_API_SECRET=X
+    networks:
+      - recipe-network
+
+  recipe-validation:
+    container_name: recipe_validation
+    build:
+      context: ./services/recipe-validation
+    depends_on:
+      - rabbitmq
+    ports:
+      - "5003:5003"
     environment:
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
       - OPENAI_API_SECRET=X
@@ -39,6 +70,22 @@ services:
       - RABBITMQ_DEFAULT_USER=guest    # Set the custom username
       - RABBITMQ_DEFAULT_PASS=guest    # Set the custom password
 
+  mongo:
+    image: mongo:latest
+    container_name: mongo-db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+      - MONGO_INITDB_DATABASE=admin
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+        - recipe-network
+
+volumes:
+  mongo-data:
 
 networks:
   recipe-network:

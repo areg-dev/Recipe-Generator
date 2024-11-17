@@ -1,4 +1,4 @@
 import os
 
 RABBITMQ_URL = os.getenv("RABBITMQ_URL")
-MONGO_URL = os.getenv('MONGO_URI')
+OPENAI_API_SECRET = os.getenv("OPENAI_API_SECRET")

@@ -22,21 +22,23 @@ def connect_to_rabbitmq():
             time.sleep(3)
 
 
-def construct_recipe_prompt(data):
+def construct_nutritional_calculator_prompt(data):
     data = json.loads(data.decode())
-    amount_of_persons = data["number_of_persons"]
-    dish_type = data["dish_type"]
-    max_cooking = data["max_cooking_time"]
-    allergies_list = ", ".join(data["allergies_list"])
-    diet_requirements = ", ".join(data["diet_requirements"])
-    cuisine_list = ", ".join(data["cuisine_list"])
 
     request_string = f"""
-        Hey, ChatGPT, generate me a meal recipe for {amount_of_persons} and {dish_type}
-        with cooking time under {max_cooking} minutes,
-        good for people with allergies to {allergies_list},
-        following {diet_requirements},
-        preferring the {cuisine_list} given."""
+        You are food technologist.
+        The recipe is defined between <recipe> and </recipe>.
+        Calculate the weight of this dish, the number of servings,
+        and the nutritional values (calories, protein, fat, carbohydrates)
+        Your output should be in format defined between <format> and </format>.
+        You are not asking questions, just responding with JSON that contains nutritional values.
+        <format>
+        1. Each of your answers is a JSON, consisting of few main parameters "calories",
+        "protein", "fat", "carbohydrates", "totalWeight"
+        </format>
+        <recipe>
+            {data["recipe"]}
+        </recipe>"""
     return request_string
 
 
@@ -49,13 +51,13 @@ def chat_gpt(prompt):
 
 
 def on_request(ch, method, properties, body):
-    recipe = construct_recipe_prompt(body)
+    recipe = construct_nutritional_calculator_prompt(body)
     response = chat_gpt(recipe)
 
     ch.basic_publish(
         exchange='',
         # Could be passed from .env file to make sure everywhere the same value
-        routing_key='queue_recipe_generation_response',
+        routing_key='queue_nutritional_calculator_response',
         properties=pika.BasicProperties(
             correlation_id=properties.correlation_id
         ),
@@ -68,12 +70,11 @@ def start_rabbitmq_consumer():
     try:
         global RABBITMQ_CONNECTION
         channel = RABBITMQ_CONNECTION.channel()
-        # Because of Recipe Generation starting before API Gateway for safety creating 2 direction queues
-        channel.queue_declare(queue="queue_recipe_generation_request", durable=False)
-        channel.queue_declare(queue="queue_recipe_generation_response", durable=False)
+        channel.queue_declare(queue="queue_nutritional_calculator_request", durable=False)
+        channel.queue_declare(queue="queue_nutritional_calculator_response", durable=False)
 
         channel.basic_consume(
-            queue="queue_recipe_generation_request",
+            queue="queue_nutritional_calculator_request",
             on_message_callback=on_request,
             auto_ack=False
         )
@@ -81,6 +82,7 @@ def start_rabbitmq_consumer():
 
     except Exception as e:
         Logger.error(f"Not connecting to RabbitMQ: {e}")
+
 
 def main():
     global RABBITMQ_CONNECTION
