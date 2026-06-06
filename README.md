@@ -1,4 +1,4 @@
-# Recipe Generator Edit
+# Recipe Generator
 
 Recipe Generator is a microservice-based application that generates, validates, and stores recipes on demand. It uses multiple services to handle the business logic, recipe generation, nutritional calculation, and validation, all orchestrated via RabbitMQ for communication.
 
